@@ -9,7 +9,8 @@ const STATS = [
     label: "Years of Experience",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M4 21V7l8-4 8 4v14" /><path d="M9 21v-6h6v6" />
+        <path d="M4 21V7l8-4 8 4v14" />
+        <path d="M9 21v-6h6v6" />
       </svg>
     ),
   },
@@ -19,7 +20,8 @@ const STATS = [
     label: "Industry Partnerships",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="9" cy="7" r="3" /><circle cx="17" cy="8" r="2.5" />
+        <circle cx="9" cy="7" r="3" />
+        <circle cx="17" cy="8" r="2.5" />
         <path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6M16 15.5c2.7.4 4 2 4 5.5" />
       </svg>
     ),
@@ -30,7 +32,8 @@ const STATS = [
     label: "Students Impacted",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 9L12 4 2 9l10 5 10-5z" /><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" />
+        <path d="M22 9L12 4 2 9l10 5 10-5z" />
+        <path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5" />
       </svg>
     ),
   },
@@ -68,6 +71,20 @@ const PILLARS = [
   },
 ];
 
+const MOBILE_BREAKPOINT = 900;
+
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -91,6 +108,7 @@ export function AboutSection() {
   const sectionRef = useRef(null);
   const started = useRef(false);
   const reducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -114,11 +132,7 @@ export function AboutSection() {
               const progress = Math.min(elapsed / duration, 1);
               const eased = easeOutExpo(progress);
 
-              setCounts(
-                STATS.map((s) =>
-                  progress >= 1 ? s.target : Math.floor(s.target * eased)
-                )
-              );
+              setCounts(STATS.map((s) => (progress >= 1 ? s.target : Math.floor(s.target * eased))));
 
               if (progress < 1) requestAnimationFrame(tick);
             };
@@ -134,65 +148,172 @@ export function AboutSection() {
   }, [reducedMotion]);
 
   return (
-    <section id="about" ref={sectionRef} className="about-section">
-      <div className="container">
+    <section
+      id="about"
+      ref={sectionRef}
+      style={{
+        backgroundColor: "#f7f4ee",
+        color: "#1c1917",
+        padding: isMobile ? "4rem 1.25rem" : "6rem 2rem",
+      }}
+    >
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <div
-          className="about-grid"
           style={{
             display: "grid",
-            gridTemplateColumns: "1.1fr 0.9fr",
-            gap: "50px",
-            alignItems: "center",
-            overflow: "hidden",
+            gridTemplateColumns: isMobile ? "1fr" : "1.1fr 0.9fr",
+            gap: isMobile ? "2.75rem" : "50px",
+            alignItems: "start",
           }}
         >
-          {/* Left Text & Stats */}
-          <div className="about-copy reveal">
-            <span className="eyebrow-label">About</span>
-            <h2 className="section-title serif">My Journey</h2>
-            <p>
-              I am the Business Head at IREED India, where I focus on business development, strategic partnerships and program growth. I work closely with industry and education leaders to design and execute initiatives that create real opportunities for students and professionals.
+          {/* Left: copy + stats */}
+          <div
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? "translateY(0)" : "translateY(16px)",
+              transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.85rem",
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                color: "#8a7e72",
+                fontWeight: 600,
+              }}
+            >
+              About
+            </span>
+            <h2
+              style={{
+                fontSize: "clamp(2rem, 5vw, 2.8rem)",
+                fontFamily: "'Fraunces', Georgia, serif",
+                margin: "0.5rem 0 1rem",
+                letterSpacing: "-0.01em",
+                color: "#1c1917",
+              }}
+            >
+              My Journey
+            </h2>
+            <p
+              style={{
+                fontSize: "1rem",
+                lineHeight: 1.7,
+                color: "#5e5447",
+                maxWidth: "540px",
+                margin: 0,
+              }}
+            >
+              I am the Business Head at IREED India, where I focus on business development, strategic
+              partnerships and program growth. I work closely with industry and education leaders to design
+              and execute initiatives that create real opportunities for students and professionals.
             </p>
-            <a href="#experience" className="link-arrow">
+
+            <a
+              href="#experience"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                marginTop: "1.1rem",
+                fontSize: "0.88rem",
+                fontWeight: 600,
+                color: "#1c1917",
+                textDecoration: "none",
+                borderBottom: "1.5px solid #1c1917",
+                paddingBottom: "2px",
+              }}
+            >
               Read More
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
             </a>
 
-            <div className="stat-grid" style={{ marginTop: 34 }}>
+            {/* Stat grid */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))",
+                gap: isMobile ? "12px" : "16px",
+                marginTop: "2.25rem",
+              }}
+            >
               {STATS.map((stat, i) => (
                 <div
-                  className="stat-card"
                   key={stat.label}
-                  data-count={stat.target}
-                  data-suffix={stat.suffix}
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid rgba(184, 112, 66, 0.16)",
+                    borderRadius: "16px",
+                    padding: isMobile ? "16px 14px" : "20px 16px",
+                    boxShadow: "0 6px 18px rgba(28, 25, 18, 0.05)",
+                    transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-3px)";
+                    e.currentTarget.style.boxShadow = "0 14px 28px rgba(184, 112, 66, 0.14)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 6px 18px rgba(28, 25, 18, 0.05)";
+                  }}
                 >
-                  <div className="stat-icon">{stat.icon}</div>
-                  <div className="stat-num" data-count={stat.target} data-suffix={stat.suffix}>
+                  <div
+                    style={{
+                      width: "34px",
+                      height: "34px",
+                      borderRadius: "10px",
+                      background: "#f8ede1",
+                      color: "#b87042",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    {stat.icon}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: isMobile ? "1.4rem" : "1.65rem",
+                      fontWeight: 800,
+                      fontFamily: "'Fraunces', Georgia, serif",
+                      color: "#1c1917",
+                      lineHeight: 1.1,
+                    }}
+                  >
                     {counts[i]}
                     {stat.suffix}
                   </div>
-                  <div className="stat-label">{stat.label}</div>
+                  <div style={{ fontSize: "0.78rem", color: "#8a7e72", marginTop: "4px", lineHeight: 1.35 }}>
+                    {stat.label}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right Card */}
+          {/* Right: leadership card */}
           <div
             style={{
               opacity: isVisible ? 1 : 0,
-              transform: isVisible ? "translateX(0) scale(1)" : "translateX(60px) scale(0.95)",
+              transform: isVisible
+                ? "translateX(0) scale(1)"
+                : isMobile
+                ? "translateY(24px) scale(0.98)"
+                : "translateX(60px) scale(0.95)",
               transition: "all 0.85s cubic-bezier(0.16, 1, 0.3, 1)",
               willChange: "transform, opacity",
-              paddingTop: "87px",
+              paddingTop: isMobile ? 0 : "87px",
             }}
           >
             <LeadershipCard
               activePillar={activePillar}
               setActivePillar={setActivePillar}
               reducedMotion={reducedMotion}
+              isMobile={isMobile}
             />
           </div>
         </div>
@@ -201,8 +322,8 @@ export function AboutSection() {
   );
 }
 
-function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
-  const uid = useId();
+function LeadershipCard({ activePillar, setActivePillar, reducedMotion, isMobile }) {
+  const uid = useId().replace(/:/g, "");
   const wrapRef = useRef(null);
   const anchorRefs = useRef([]);
   const [tops, setTops] = useState([]);
@@ -222,7 +343,7 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
   useLayoutEffect(() => {
     measure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePillar]);
+  }, [activePillar, isMobile]);
 
   useEffect(() => {
     const ro = new ResizeObserver(() => measure());
@@ -250,22 +371,44 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
         background: "linear-gradient(145deg, #FBF8F2 0%, #EFE9DC 100%)",
         border: "1px solid rgba(185, 163, 121, 0.4)",
         borderRadius: "24px",
-        padding: "36px 32px",
+        padding: isMobile ? "26px 20px" : "5px 32px",
         boxShadow: "0 20px 45px rgba(28, 25, 18, 0.07)",
         position: "relative",
+        boxSizing: "border-box",
       }}
     >
       {/* Header Badge */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "26px", gap: "12px" }}>
         <div>
           <span style={{ fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#8C7B5D", fontWeight: 600 }}>
             CORE FOCUS
           </span>
-          <h3 style={{ fontSize: "1.45rem", fontFamily: "Fraunces, serif", color: "#1C1912", margin: "4px 0 0" }}>
+          <h3
+            style={{
+              fontSize: isMobile ? "1.2rem" : "1.45rem",
+              fontFamily: "'Fraunces', Georgia, serif",
+              color: "#1C1912",
+              margin: "4px 0 0",
+            }}
+          >
             Leadership Pillars
           </h3>
         </div>
-        <div style={{ background: "#1C1912", color: "#F7F4EE", width: "36px", height: "36px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "14px" }}>
+        <div
+          style={{
+            background: "#1C1912",
+            color: "#F7F4EE",
+            width: "36px",
+            height: "36px",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: 700,
+            fontSize: "12px",
+            flexShrink: 0,
+          }}
+        >
           IREED
         </div>
       </div>
@@ -273,7 +416,7 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
       {/* Pipeline: gutter thread + pillar rows */}
       <div
         ref={wrapRef}
-        style={{ display: "grid", gridTemplateColumns: "30px 1fr", marginBottom: "28px", position: "relative" }}
+        style={{ display: "grid", gridTemplateColumns: "26px 1fr", marginBottom: "24px", position: "relative" }}
       >
         {/* Gutter: the connecting thread */}
         <div style={{ position: "relative" }}>
@@ -302,10 +445,8 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
                   height: Math.max(topActive - top0, 0),
                   background: "linear-gradient(180deg, #CBB98D, #9E8255)",
                   backgroundSize: "100% 200%",
-                  transition: reducedMotion
-                    ? "none"
-                    : "height 0.55s cubic-bezier(0.65, 0, 0.35, 1)",
-                  animation: reducedMotion ? "none" : `${uid}-shimmer 2.4s linear infinite`,
+                  transition: reducedMotion ? "none" : "height 0.55s cubic-bezier(0.65, 0, 0.35, 1)",
+                  animation: reducedMotion ? "none" : `${uid}shimmer 2.4s linear infinite`,
                   borderRadius: 2,
                 }}
               />
@@ -336,7 +477,7 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
         </div>
 
         {/* Pillar rows */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px", minWidth: 0 }}>
           {PILLARS.map((item, idx) => (
             <div
               key={item.tag}
@@ -347,7 +488,7 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
                 if (e.key === "Enter" || e.key === " ") setActivePillar(idx);
               }}
               style={{
-                padding: "12px 14px",
+                padding: isMobile ? "10px 12px" : "12px 14px",
                 borderRadius: "14px",
                 background: activePillar === idx ? "#FFFFFF" : "transparent",
                 border: activePillar === idx ? "1px solid #CBB98D" : "1px solid transparent",
@@ -355,16 +496,17 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
                 transition: "all 0.25s ease",
                 boxShadow: activePillar === idx ? "0 8px 20px rgba(28, 25, 18, 0.06)" : "none",
                 outline: "none",
+                minWidth: 0,
               }}
             >
               <div
                 ref={(el) => (anchorRefs.current[idx] = el)}
                 style={{ display: "flex", alignItems: "center", gap: "12px" }}
               >
-                <span style={{ fontSize: "12px", fontWeight: 700, color: activePillar === idx ? "#9E8255" : "#A69F94" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: activePillar === idx ? "#9E8255" : "#A69F94", flexShrink: 0 }}>
                   {item.tag}
                 </span>
-                <h4 style={{ fontSize: "15px", fontWeight: 600, color: "#1C1912", margin: 0 }}>
+                <h4 style={{ fontSize: isMobile ? "14px" : "15px", fontWeight: 600, color: "#1C1912", margin: 0 }}>
                   {item.title}
                 </h4>
               </div>
@@ -376,7 +518,17 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
                 }}
               >
                 <div style={{ overflow: "hidden" }}>
-                  <p style={{ margin: "8px 0 0 26px", fontSize: "13px", color: "#61594D", lineHeight: 1.5, minWidth: "600px" }}>
+                  <p
+                    style={{
+                      margin: "8px 0 0 26px",
+                      fontSize: "13px",
+                      color: "#61594D",
+                      lineHeight: 1.5,
+                      // No fixed min-width here — that was forcing horizontal
+                      // overflow on narrow screens. It wraps naturally now.
+                      maxWidth: "100%",
+                    }}
+                  >
                     {item.desc}
                   </p>
                 </div>
@@ -390,13 +542,24 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
       <div
         style={{
           borderTop: "1px solid rgba(185, 163, 121, 0.3)",
-          paddingTop: "20px",
+          paddingTop: "18px",
           display: "flex",
           alignItems: "center",
           gap: "14px",
         }}
       >
-        <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "#E5DAC5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div
+          style={{
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            background: "#E5DAC5",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B2519" strokeWidth="2.2" strokeLinecap="round">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
           </svg>
@@ -407,7 +570,7 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
       </div>
 
       <style>{`
-        @keyframes ${uid}-shimmer {
+        @keyframes ${uid}shimmer {
           0% { background-position: 0 100%; }
           100% { background-position: 0 -100%; }
         }
@@ -418,3 +581,5 @@ function LeadershipCard({ activePillar, setActivePillar, reducedMotion }) {
     </div>
   );
 }
+
+export default AboutSection;

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Linkedin, Twitter, Link2, Check } from "lucide-react";
+import { Link2, Check } from "lucide-react";
+import { FaLinkedinIn, FaTwitter } from "react-icons/fa";
 
 export function ShareBar({ title }) {
   const [copied, setCopied] = useState(false);
@@ -31,7 +32,7 @@ export function ShareBar({ title }) {
         aria-label="Share on LinkedIn"
         className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-ink-soft transition-colors hover:border-pista-600 hover:text-pista-700"
       >
-        <Linkedin size={15} strokeWidth={1.75} />
+        <FaLinkedinIn size={15} strokeWidth={1.75} />
       </a>
       <a
         href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`}
@@ -40,7 +41,7 @@ export function ShareBar({ title }) {
         aria-label="Share on X"
         className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-ink-soft transition-colors hover:border-pista-600 hover:text-pista-700"
       >
-        <Twitter size={15} strokeWidth={1.75} />
+        <FaTwitter size={15} strokeWidth={1.75} />
       </a>
       <button
         onClick={handleCopy}

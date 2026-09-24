@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 
 const FOCUS_AREAS = [
   {
@@ -81,7 +81,238 @@ const FOCUS_AREAS = [
   },
 ];
 
-export function FocusAreasSection() {
+const MOBILE_BREAKPOINT = 860;
+
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
+function SectionHeader() {
+  return (
+    <div style={{ marginBottom: "2rem" }}>
+      <span
+        style={{
+          fontSize: "0.85rem",
+          textTransform: "uppercase",
+          letterSpacing: "2px",
+          color: "#8a7e72",
+          fontWeight: "600",
+        }}
+      >
+        What I Do
+      </span>
+      <h2
+        style={{
+          fontSize: "clamp(1.9rem, 5vw, 2.6rem)",
+          fontFamily: "serif",
+          marginTop: "0.4rem",
+          marginBottom: "0.5rem",
+          letterSpacing: "-0.5px",
+          color: "#1c1917",
+        }}
+      >
+        Key Focus Areas
+      </h2>
+      <div
+        style={{
+          width: "45px",
+          height: "3px",
+          backgroundColor: "#b87042",
+          borderRadius: "3px",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Mobile: a clean connected timeline — matches the vocabulary used   */
+/* elsewhere on the site (spine + icon node + accent card) instead    */
+/* of the old tap-expand blocks with huge scroll spacers.             */
+/* ---------------------------------------------------------------- */
+function MobileFocusAreas() {
+  const [activeStep, setActiveStep] = useState(0);
+  const cardRefs = useRef([]);
+  const [visible, setVisible] = useState([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = cardRefs.current.indexOf(entry.target);
+          if (idx === -1) return;
+          if (entry.isIntersecting) {
+            setVisible((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
+          }
+        });
+
+        let best = null;
+        let bestDist = Infinity;
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const dist = Math.abs(
+            entry.boundingClientRect.top + entry.boundingClientRect.height / 2 - window.innerHeight / 2
+          );
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = entry.target;
+          }
+        });
+        if (best) {
+          const idx = cardRefs.current.indexOf(best);
+          if (idx !== -1) setActiveStep(idx);
+        }
+      },
+      { threshold: 0.2, rootMargin: "-15% 0px -35% 0px" }
+    );
+
+    cardRefs.current.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const spineFillPercent = `${(activeStep / (FOCUS_AREAS.length - 1)) * 100}%`;
+
+  return (
+    <div
+      style={{
+        backgroundColor: "#f7f4ee",
+        color: "#1c1917",
+        padding: "3.5rem 1.25rem",
+      }}
+    >
+      <div style={{ maxWidth: "560px", margin: "0 auto" }}>
+        <SectionHeader />
+
+        <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          {/* Static dotted spine */}
+          <div
+            style={{
+              position: "absolute",
+              top: "22px",
+              bottom: "22px",
+              left: "21px",
+              width: "2px",
+              background:
+                "repeating-linear-gradient(to bottom, #ddd2c0 0, #ddd2c0 6px, transparent 6px, transparent 12px)",
+              zIndex: 0,
+            }}
+          />
+          {/* Animated fill spine */}
+          <motion.div
+            animate={{ height: spineFillPercent }}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
+            style={{
+              position: "absolute",
+              top: "22px",
+              left: "21px",
+              width: "2px",
+              background: "linear-gradient(180deg, #965228 0%, #b87042 60%, #d89665 100%)",
+              boxShadow: "0 0 8px rgba(184, 112, 66, 0.35)",
+              zIndex: 1,
+            }}
+          />
+
+          {FOCUS_AREAS.map((item, index) => {
+            const isActive = activeStep === index;
+            const isDone = visible.includes(index);
+
+            return (
+              <motion.div
+                key={item.id}
+                ref={(el) => (cardRefs.current[index] = el)}
+                initial={{ opacity: 0, x: -14 }}
+                animate={isDone ? { opacity: 1, x: 0 } : { opacity: 0, x: -14 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                onClick={() => setActiveStep(index)}
+                style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: "1rem", zIndex: 2 }}
+              >
+                {/* Icon node */}
+                <motion.div
+                  animate={{
+                    backgroundColor: isActive ? "#b87042" : "#1c1917",
+                    scale: isActive ? 1.1 : 1,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "50%",
+                    color: "#f7f4ee",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: isActive
+                      ? "0 6px 16px rgba(184, 112, 66, 0.35), 0 0 0 4px #f7f4ee"
+                      : "0 4px 12px rgba(28, 25, 18, 0.18), 0 0 0 4px #f7f4ee",
+                  }}
+                >
+                  {item.icon}
+                </motion.div>
+
+                {/* Card */}
+                <motion.div
+                  animate={{
+                    backgroundColor: isActive ? "#ffffff" : "#fbf9f5",
+                    boxShadow: isActive
+                      ? "0 14px 30px -10px rgba(66, 44, 28, 0.16), 0 0 0 1px rgba(184, 112, 66, 0.18)"
+                      : "0 2px 8px rgba(0,0,0,0.04)",
+                  }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    flex: 1,
+                    borderRadius: "14px",
+                    borderLeft: isActive ? "3px solid #b87042" : "3px solid #e4dccd",
+                    padding: "16px 18px",
+                    cursor: "pointer",
+                    marginTop: "1px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "1.02rem",
+                      fontWeight: "700",
+                      margin: "0 0 6px 0",
+                      color: "#1c1917",
+                      fontFamily: "serif",
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "0.86rem",
+                      color: "#6b6156",
+                      lineHeight: "1.5",
+                      margin: 0,
+                    }}
+                  >
+                    {item.description}
+                  </p>
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* Desktop / tablet: original horizontal scroll-driven timeline      */
+/* ---------------------------------------------------------------- */
+function DesktopFocusAreas() {
   const containerRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
 
@@ -90,7 +321,6 @@ export function FocusAreasSection() {
     offset: ["start center", "end center"],
   });
 
-  // 6 cards ke hisaab se scroll intervals (1/6 = ~0.166 per stage)
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (latest < 0.16) setActiveStep(0);
     else if (latest < 0.33) setActiveStep(1);
@@ -109,7 +339,7 @@ export function FocusAreasSection() {
         minHeight: "220vh",
         backgroundColor: "#f7f4ee",
         color: "#1c1917",
-        padding: "2rem 2rem",
+        padding: "2rem clamp(1.5rem, 4vw, 2rem)",
         position: "relative",
       }}
     >
@@ -121,41 +351,8 @@ export function FocusAreasSection() {
           margin: "0 auto",
         }}
       >
-        {/* Header Section */}
-        <div style={{ marginBottom: "1rem" }}>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              color: "#8a7e72",
-              fontWeight: "600",
-            }}
-          >
-            What I Do
-          </span>
-          <h2
-            style={{
-              fontSize: "2.6rem",
-              fontFamily: "serif",
-              marginTop: "0.4rem",
-              marginBottom: "0.5rem",
-              letterSpacing: "-0.5px",
-            }}
-          >
-            Key Focus Areas
-          </h2>
-          <div
-            style={{
-              width: "45px",
-              height: "3px",
-              backgroundColor: "#b87042",
-              borderRadius: "3px",
-            }}
-          />
-        </div>
+        <SectionHeader />
 
-        {/* Timeline Track & Expanding Square Nodes */}
         <div
           style={{
             position: "relative",
@@ -166,7 +363,6 @@ export function FocusAreasSection() {
             height: "380px",
           }}
         >
-          {/* Background Dotted Line Track */}
           <div
             style={{
               position: "absolute",
@@ -174,13 +370,13 @@ export function FocusAreasSection() {
               left: "25px",
               right: "25px",
               height: "2px",
-              background: "repeating-linear-gradient(to right, #cfc5b8 0, #cfc5b8 6px, transparent 6px, transparent 12px)",
+              background:
+                "repeating-linear-gradient(to right, #cfc5b8 0, #cfc5b8 6px, transparent 6px, transparent 12px)",
               transform: "translateY(-50%)",
               zIndex: 0,
             }}
           />
 
-          {/* Active Liquid Bronze Progress Line */}
           <motion.div
             style={{
               position: "absolute",
@@ -213,11 +409,7 @@ export function FocusAreasSection() {
               >
                 <motion.div
                   layout
-                  transition={{
-                    type: "spring",
-                    stiffness: 280,
-                    damping: 26,
-                  }}
+                  transition={{ type: "spring", stiffness: 280, damping: 26 }}
                   animate={{
                     width: isActive ? 270 : 54,
                     height: isActive ? 275 : 48,
@@ -245,7 +437,6 @@ export function FocusAreasSection() {
                     position: "relative",
                   }}
                 >
-                  {/* Subtle Card Ambient Glow for Active State */}
                   {isActive && (
                     <div
                       style={{
@@ -254,13 +445,13 @@ export function FocusAreasSection() {
                         right: 0,
                         width: "120px",
                         height: "120px",
-                        background: "radial-gradient(circle at top right, rgba(184, 112, 66, 0.08) 0%, transparent 70%)",
+                        background:
+                          "radial-gradient(circle at top right, rgba(184, 112, 66, 0.08) 0%, transparent 70%)",
                         pointerEvents: "none",
                       }}
                     />
                   )}
 
-                  {/* Icon Box with Cursor Pointer & Hover Color Animation */}
                   <motion.div
                     layout="position"
                     whileHover={{
@@ -290,7 +481,6 @@ export function FocusAreasSection() {
                     {item.icon}
                   </motion.div>
 
-                  {/* Expanded Content with Slide-Fade Stagger */}
                   {isActive && (
                     <motion.div
                       initial={{ opacity: 0, y: 14 }}
@@ -338,9 +528,7 @@ export function FocusAreasSection() {
                       >
                         {item.linkText}
                         <motion.svg
-                          variants={{
-                            arrowHover: { x: 4 },
-                          }}
+                          variants={{ arrowHover: { x: 4 } }}
                           transition={{ type: "spring", stiffness: 350, damping: 20 }}
                           width="12"
                           height="12"
@@ -363,6 +551,14 @@ export function FocusAreasSection() {
       </div>
     </div>
   );
+}
+
+/* ---------------------------------------------------------------- */
+/* Top-level: picks the right layout for the viewport                */
+/* ---------------------------------------------------------------- */
+export function FocusAreasSection() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileFocusAreas /> : <DesktopFocusAreas />;
 }
 
 export default FocusAreasSection;

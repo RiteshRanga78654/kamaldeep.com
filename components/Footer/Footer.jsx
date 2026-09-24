@@ -1,9 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+const MOBILE_BREAKPOINT = 720;
+
+function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export function Footer() {
+  const isMobile = useIsMobile();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -13,20 +29,19 @@ export function Footer() {
       style={{
         backgroundColor: "#161311",
         color: "#f5efe6",
-        padding: "3.5rem 1.5rem 2rem",
+        padding: isMobile ? "2.75rem 1.25rem 1.75rem" : "3.5rem 1.5rem 2rem",
         borderTop: "1px solid rgba(184, 112, 66, 0.25)",
         position: "relative",
       }}
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        
         {/* Main Content Grid */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1.2fr 0.8fr 1fr",
-            gap: "2.5rem",
-            paddingBottom: "2.5rem",
+            gridTemplateColumns: isMobile ? "1fr" : "1.2fr 0.8fr 1fr",
+            gap: isMobile ? "2rem" : "2.5rem",
+            paddingBottom: isMobile ? "2rem" : "2.5rem",
             borderBottom: "1px solid rgba(245, 239, 230, 0.1)",
           }}
         >
@@ -45,6 +60,7 @@ export function Footer() {
                   justifyContent: "center",
                   fontWeight: "800",
                   fontSize: "0.85rem",
+                  flexShrink: 0,
                 }}
               >
                 I
@@ -53,7 +69,15 @@ export function Footer() {
                 IREED India
               </span>
             </div>
-            <p style={{ color: "#a59b8d", fontSize: "0.88rem", lineHeight: "1.6", maxWidth: "340px", margin: 0 }}>
+            <p
+              style={{
+                color: "#a59b8d",
+                fontSize: "0.88rem",
+                lineHeight: "1.6",
+                maxWidth: isMobile ? "none" : "340px",
+                margin: 0,
+              }}
+            >
               Designing and scaling high-impact industry–academia initiatives, strategic alliances, and executive learning ecosystems.
             </p>
           </div>
@@ -71,7 +95,13 @@ export function Footer() {
             >
               Navigation
             </h4>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "1fr 1fr",
+                gap: "10px 16px",
+              }}
+            >
               {["Home", "About", "Experience", "Projects", "Blog", "Contact"].map((item) => (
                 <a
                   key={item}
@@ -112,6 +142,7 @@ export function Footer() {
                     borderRadius: "50%",
                     backgroundColor: "#4ade80",
                     boxShadow: "0 0 8px #4ade80",
+                    flexShrink: 0,
                   }}
                 />
                 <span style={{ fontSize: "0.82rem", color: "#f5efe6", fontWeight: "600" }}>
@@ -140,6 +171,7 @@ export function Footer() {
                 fontSize: "0.84rem",
                 fontWeight: "600",
                 textDecoration: "none",
+                width: isMobile ? "100%" : "auto",
               }}
             >
               Get in Touch
@@ -154,15 +186,16 @@ export function Footer() {
         <div
           style={{
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
             alignItems: "center",
-            paddingTop: "1.8rem",
-            flexWrap: "wrap",
-            gap: "1rem",
+            paddingTop: isMobile ? "1.6rem" : "1.8rem",
+            gap: isMobile ? "1.25rem" : "1rem",
+            textAlign: isMobile ? "center" : "left",
           }}
         >
           {/* Social Icons */}
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", order: isMobile ? 1 : 0 }}>
             {[
               {
                 name: "LinkedIn",
@@ -192,6 +225,7 @@ export function Footer() {
                   alignItems: "center",
                   justifyContent: "center",
                   transition: "all 0.2s ease",
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "#ffffff";
@@ -210,7 +244,7 @@ export function Footer() {
           </div>
 
           {/* Copyright */}
-          <span style={{ fontSize: "0.8rem", color: "#807669" }}>
+          <span style={{ fontSize: "0.8rem", color: "#807669", order: isMobile ? 2 : 0 }}>
             © {new Date().getFullYear()} Kamaldeep Prajapati. All rights reserved.
           </span>
 
@@ -228,12 +262,12 @@ export function Footer() {
               display: "flex",
               alignItems: "center",
               gap: "6px",
+              order: isMobile ? 0 : 0,
             }}
           >
             Back to top ↑
           </button>
         </div>
-
       </div>
     </footer>
   );

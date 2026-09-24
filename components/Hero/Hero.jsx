@@ -115,7 +115,7 @@ export function Hero() {
         position: "relative",
         backgroundColor: "#f7f4ee",
         color: "#1c1917",
-        minHeight: "100vh",
+     minHeight: isMobile ? "auto" : "100vh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",

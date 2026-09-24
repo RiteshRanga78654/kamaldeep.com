@@ -1,9 +1,26 @@
 "use client";
 
-import React, { useState, useRef, useLayoutEffect, useCallback, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useReducedMotion,
+} from "framer-motion";
 
 const MOBILE_BREAKPOINT = 640;
+
+// ---- Animation settings (tweak these) ----
+const TYPE_SPEED = 85;      // ms per letter
+const START_DELAY = 500;    // ms before typing starts
+const GAP_DESKTOP = 100;    // px gap between PRAJ and APATI
+const EASE = [0.22, 1, 0.36, 1];
+
+const TOP_WORD = "Kamaldeep";
+const BOTTOM_A = "PRAJ";
+const BOTTOM_B = "APATI";
+const TOTAL = TOP_WORD.length + BOTTOM_A.length + BOTTOM_B.length;
 
 function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
   const [isMobile, setIsMobile] = useState(false);
@@ -17,34 +34,67 @@ function useIsMobile(breakpoint = MOBILE_BREAKPOINT) {
   return isMobile;
 }
 
+// Every letter is always in the layout (hidden until typed),
+// so the centered text never jumps while typing.
+function TypedChars({ text, offset, n, showCaret }) {
+  return text.split("").map((c, i) => {
+    const idx = offset + i;
+    return (
+      <span
+        key={i}
+        style={{ visibility: idx < n ? "visible" : "hidden", position: "relative" }}
+      >
+        {c}
+        {showCaret && idx === n - 1 && (
+          <motion.span
+            aria-hidden
+            animate={{ opacity: [1, 0, 1] }}
+            transition={{ duration: 0.8, repeat: Infinity }}
+            style={{
+              position: "absolute",
+              right: "-0.06em",
+              top: "6%",
+              height: "88%",
+              width: "0.045em",
+              background: "#b87042",
+            }}
+          />
+        )}
+      </span>
+    );
+  });
+}
+
 export function Hero() {
   const [imgError, setImgError] = useState(false);
   const heroRef = useRef(null);
   const isMobile = useIsMobile();
+  const reduce = useReducedMotion();
 
-  // Refs for measuring exactly where "J" ends and "A" begins inside PRAJAPATI.
-  // Only meaningful on the single-line desktop layout — on mobile the photo
-  // uses a simple centered position instead, since the word can wrap.
-  const wordRef = useRef(null);
-  const partRef = useRef(null); // wraps "PRAJ"
-  const [pivotPercent, setPivotPercent] = useState(35); // fallback until measured
+  // n = how many letters are typed. stage 0 = typing, 1 = photo + rest revealed
+  const [n, setN] = useState(0);
+  const [stage, setStage] = useState(0);
 
-  const measurePivot = useCallback(() => {
-    if (isMobile) return;
-    if (!wordRef.current || !partRef.current) return;
-    const wordBox = wordRef.current.getBoundingClientRect();
-    const partBox = partRef.current.getBoundingClientRect();
-    if (wordBox.width === 0) return;
-    const boundary = partBox.right - wordBox.left; // px from left edge of the word to the J/A split
-    setPivotPercent((boundary / wordBox.width) * 100);
-  }, [isMobile]);
+  useEffect(() => {
+    if (reduce) {
+      setN(TOTAL);
+      return;
+    }
+    if (n >= TOTAL) return;
+    const t = setTimeout(() => setN(n + 1), n === 0 ? START_DELAY : TYPE_SPEED);
+    return () => clearTimeout(t);
+  }, [n, reduce]);
 
-  useLayoutEffect(() => {
-    measurePivot();
-    window.addEventListener("resize", measurePivot);
-    return () => window.removeEventListener("resize", measurePivot);
-  }, [measurePivot]);
+  useEffect(() => {
+    if (n === TOTAL && stage === 0) {
+      const t = setTimeout(() => setStage(1), reduce ? 0 : 350);
+      return () => clearTimeout(t);
+    }
+  }, [n, stage, reduce]);
 
+  const revealed = stage >= 1;
+
+  // Mouse parallax
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -77,7 +127,6 @@ export function Hero() {
     <img
       src="/images/profile/kamal01/kamal.png"
       alt="Kamaldeep Prajapati"
-      onLoad={measurePivot}
       onError={() => setImgError(true)}
       style={{
         width: "100%",
@@ -99,11 +148,26 @@ export function Hero() {
         fontFamily: "serif",
         fontSize: "2.4rem",
         color: "#b87042",
+        WebkitTextStroke: 0,
       }}
     >
       KP
     </div>
   );
+
+  const riseIn = {
+    initial: { opacity: 0, y: reduce ? 0 : 170 },
+    animate: revealed ? { opacity: 1, y: 0 } : { opacity: 0, y: reduce ? 0 : 170 },
+    transition: reduce
+      ? { duration: 0 }
+      : { y: { duration: 1.1, ease: EASE }, opacity: { duration: 0.5 } },
+  };
+
+  const fadeUp = (delay) => ({
+    initial: { opacity: 0, y: 20 },
+    animate: revealed ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+    transition: { duration: reduce ? 0 : 0.6, delay: reduce ? 0 : delay },
+  });
 
   return (
     <section
@@ -115,7 +179,7 @@ export function Hero() {
         position: "relative",
         backgroundColor: "#f7f4ee",
         color: "#1c1917",
-     minHeight: isMobile ? "auto" : "100vh",
+        minHeight: isMobile ? "auto" : "100vh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
@@ -126,7 +190,7 @@ export function Hero() {
         userSelect: "none",
       }}
     >
-      {/* Ambient glow — theme unchanged */}
+      {/* Ambient glow */}
       <div
         style={{
           position: "absolute",
@@ -135,7 +199,8 @@ export function Hero() {
           transform: "translateX(-50%)",
           width: isMobile ? "90vw" : "750px",
           height: isMobile ? "320px" : "450px",
-          background: "radial-gradient(ellipse at center, rgba(184, 112, 66, 0.09) 0%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse at center, rgba(184, 112, 66, 0.09) 0%, transparent 70%)",
           pointerEvents: "none",
           zIndex: 0,
         }}
@@ -154,14 +219,12 @@ export function Hero() {
           boxSizing: "border-box",
         }}
       >
-        {/* TOP WORD: KAMALDEEP (solid) */}
+        {/* TOP WORD: KAMALDEEP (typed) */}
         <motion.div
           style={{ x: textMoveX, y: textMoveY, width: "100%", textAlign: "center" }}
-          initial={{ opacity: 0, y: -25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
         >
           <h1
+            aria-label="Kamaldeep"
             style={{
               fontSize: headlineFontSize,
               fontWeight: 900,
@@ -172,28 +235,30 @@ export function Hero() {
               margin: 0,
             }}
           >
-            Kamaldeep
+            <TypedChars
+              text={TOP_WORD}
+              offset={0}
+              n={n}
+              showCaret={stage === 0 && n <= TOP_WORD.length}
+            />
           </h1>
         </motion.div>
 
-        {/* Mobile: photo sits centered between the two words, no letter-split pin */}
+        {/* Mobile: photo slot between the two words (space is reserved, photo rises into it) */}
         {isMobile && (
-          <motion.div
+          <div
             style={{
               position: "relative",
               width: "clamp(150px, 42vw, 220px)",
               margin: "0.4rem 0",
               zIndex: 3,
             }}
-            initial={{ opacity: 0, y: 20, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
           >
-            {portrait}
-          </motion.div>
+            <motion.div {...riseIn}>{portrait}</motion.div>
+          </div>
         )}
 
-        {/* BOTTOM WORD: PRAJAPATI (outline) — photo pinned to the J / A boundary on desktop */}
+        {/* BOTTOM WORD: PRAJ [gap + photo] APATI */}
         <motion.div
           style={{
             x: textMoveX,
@@ -203,12 +268,9 @@ export function Hero() {
             textAlign: "center",
             marginTop: isMobile ? 0 : "-0.03em",
           }}
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
         >
           <h2
-            ref={wordRef}
+            aria-label="Prajapati"
             style={{
               fontSize: headlineFontSize,
               fontWeight: 900,
@@ -221,51 +283,80 @@ export function Hero() {
               display: "inline-block",
             }}
           >
-            <span ref={partRef} style={{ marginRight: isMobile ? "0" : "100px" }}>
-              PRAJ
-            </span>
-            <span>APATI</span>
-          </h2>
+            <TypedChars
+              text={BOTTOM_A}
+              offset={TOP_WORD.length}
+              n={n}
+              showCaret={stage === 0 && n > TOP_WORD.length && n <= TOP_WORD.length + BOTTOM_A.length}
+            />
 
-          {/* Desktop only: portrait horizontally pinned to the measured J/A split */}
-          {!isMobile && (
-            <motion.div
-              style={{
-                x: photoMoveX,
-                y: photoMoveY,
-                position: "absolute",
-                top: "-24px",
-                left: "35%",
-                transform: "translateX(-50%)",
-                zIndex: 3,
-                width: "clamp(230px, 22vw, 340px)",
-                pointerEvents: "none",
-              }}
-              initial={{ opacity: 0, y: 30, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-            >
-              {portrait}
-              {/* Blend the photo's lower edge into the page background */}
-              <div
+            {/* Desktop: gap that opens up while the photo rises into it */}
+            {!isMobile && (
+              <motion.span
+                aria-hidden
+                initial={{ width: 0 }}
+                animate={{ width: revealed ? GAP_DESKTOP : 0 }}
+                transition={{ duration: reduce ? 0 : 1.1, ease: EASE }}
                 style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "70px",
-                  background: "linear-gradient(to top, #fbf9f5 20%, transparent 100%)",
+                  display: "inline-block",
+                  position: "relative",
+                  verticalAlign: "top",
+                  height: "0.86em",
                 }}
-              />
-            </motion.div>
-          )}
+              >
+                {/* parallax wrapper (mouse) */}
+                <motion.div
+                  style={{
+                    x: photoMoveX,
+                    y: photoMoveY,
+                    position: "absolute",
+                    top: "-24px",
+                    left: 0,
+                    right: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                    zIndex: 3,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {/* entrance wrapper (rise from below) */}
+                  <motion.div
+                    {...riseIn}
+                    style={{
+                      position: "relative",
+                      flexShrink: 0,
+                      width: "clamp(230px, 22vw, 340px)",
+                    }}
+                  >
+                    {portrait}
+                    {/* Blend the photo's lower edge into the page background */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: "70px",
+                        background: "linear-gradient(to top, #fbf9f5 20%, transparent 100%)",
+                      }}
+                    />
+                  </motion.div>
+                </motion.div>
+              </motion.span>
+            )}
+
+            <TypedChars
+              text={BOTTOM_B}
+              offset={TOP_WORD.length + BOTTOM_A.length}
+              n={n}
+              showCaret={stage === 0 && n > TOP_WORD.length + BOTTOM_A.length}
+            />
+          </h2>
         </motion.div>
 
-        {/* Pill buttons */}
+        {/* Pill buttons — appear after the photo settles */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          {...fadeUp(0.7)}
           style={{
             position: "relative",
             zIndex: 10,
@@ -277,6 +368,7 @@ export function Hero() {
             alignItems: "center",
             gap: isMobile ? "0.75rem" : 0,
             padding: isMobile ? 0 : "0 8%",
+            pointerEvents: revealed ? "auto" : "none",
           }}
         >
           <motion.a
@@ -325,9 +417,7 @@ export function Hero() {
 
         {/* Social icons */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
+          {...fadeUp(0.85)}
           style={{
             width: "100%",
             display: "flex",
@@ -335,6 +425,7 @@ export function Hero() {
             padding: isMobile ? 0 : "0 8%",
             marginTop: isMobile ? "1.4rem" : "0.8rem",
             zIndex: 10,
+            pointerEvents: revealed ? "auto" : "none",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

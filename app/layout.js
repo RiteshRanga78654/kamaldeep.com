@@ -1,7 +1,4 @@
 import "./globals.css";
-import { Header } from "@/components/Header/Header";
-import { Footer } from "@/components/Footer/Footer";
-import { SiteScripts } from "@/components/Scripts/SiteScripts";
 
 export const metadata = {
   title: "Kamaldeep Prajapati — Business Head at IREED India",
@@ -37,10 +34,7 @@ export default function RootLayout({ children }) {
         >
           Skip to content
         </a>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <SiteScripts />
+        {children}
       </body>
     </html>
   );

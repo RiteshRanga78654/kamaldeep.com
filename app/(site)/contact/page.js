@@ -10,6 +10,7 @@ export default function ContactPage() {
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -19,18 +20,31 @@ export default function ContactPage() {
   });
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("contact@ireedindia.com");
+    navigator.clipboard.writeText("kamaldeep.prajapati@ireedindia.com");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/queries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Submission failed. Please try again.");
+      }
       setSent(true);
-    }, 1200);
+    } catch (err) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -523,6 +537,11 @@ export default function ContactPage() {
                       <ShieldCheck size={14} />
                       <span>Transmitted securely with strict executive confidentiality.</span>
                     </div>
+                    {submitError && (
+                      <div style={{ marginTop: "12px", padding: "10px 14px", borderRadius: "10px", backgroundColor: "rgba(220, 38, 38, 0.08)", border: "1px solid rgba(220, 38, 38, 0.2)", color: "#b91c1c", fontSize: "0.82rem" }}>
+                        {submitError}
+                      </div>
+                    )}
                   </div>
 
                 </form>

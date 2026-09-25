@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "About", href: "#about" },
-  { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#work" },
   { label: "Blog", href: "/blogs" },
-  { label: "Contact", href: "#contact" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Header() {
@@ -30,7 +28,7 @@ export function Header() {
     <header id="siteHeader" className={scrolled ? "scrolled" : ""}>
       <div className="container nav-wrap">
         <a href="#home" className="logo">
-          <span className="logo-mark">I</span>IREED
+          <span className="logo-mark">KP</span>Kamaldeep.com
         </a>
         <nav className={open ? "links open" : "links"} id="navLinks">
           {NAV_LINKS.map((link) => (

@@ -63,10 +63,10 @@ export function Footer() {
                   flexShrink: 0,
                 }}
               >
-                I
+                KP
               </span>
               <span style={{ fontSize: "1.3rem", fontFamily: "serif", fontWeight: "700" }}>
-                IREED India
+                Kamaldeep Prajapati
               </span>
             </div>
             <p
@@ -102,10 +102,17 @@ export function Footer() {
                 gap: "10px 16px",
               }}
             >
-              {["Home", "About", "Experience", "Projects", "Blog", "Contact"].map((item) => (
+              {[
+                { label: "Home", href: "/" },
+                { label: "Blog", href: "/blogs" },
+                { label: "Gallery", href: "/gallery" },
+                { label: "Contact", href: "/contact" },
+                { label: "About", href: "/#about" },
+                { label: "Experience", href: "/#experience" },
+              ].map((item) => (
                 <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+                  key={item.label}
+                  href={item.href}
                   style={{
                     color: "#a59b8d",
                     textDecoration: "none",
@@ -115,7 +122,7 @@ export function Footer() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#e3a774")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#a59b8d")}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </div>

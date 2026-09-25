@@ -5,7 +5,7 @@ export default async function sitemap() {
   const posts = await fetchBlogs();
   const base = profile.metadataBase;
 
-  const staticRoutes = ["", "/blogs"].map((path) => ({
+  const staticRoutes = ["", "/blogs", "/gallery"].map((path) => ({
     url: `${base}${path}`,
     lastModified: new Date(),
   }));

@@ -9,8 +9,6 @@ export const metadata = {
   alternates: { canonical: "/blogs" },
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function BlogsPage() {
   const [posts, categories] = await Promise.all([fetchBlogs(), fetchCategories()]);
 

@@ -1,8 +1,6 @@
 import { getGallery } from "@/lib/store";
 import { GalleryExplorer } from "@/components/Gallery/GalleryExplorer";
 
-export const dynamic = "force-dynamic";
-
 export const metadata = {
   title: "Gallery — Kamaldeep Prajapati",
   description:

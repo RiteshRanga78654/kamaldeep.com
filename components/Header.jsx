@@ -29,7 +29,7 @@ export default function Header() {
         {/* Logo: lg screen (1024px) par aur left karne ke liye 'lg:-ml-4' ya 'lg:pl-0' add kiya hai */}
         <a
           href="#"
-          className="font-serif text-[1.625rem] italic leading-[30px] text-ink sm:text-4xl sm:leading-[36px] lg:-ml-6.5 xl:ml-0"
+          className="font-serif text-[1.625rem] italic leading-[30px] text-ink sm:text-4xl sm:leading-[36px] lg:-ml-6.5 xl:ml-[-87px]"
           style={{
             fontFamily: "var(--font-playfair), 'Playfair Display', serif",
             color: "#5F694B",

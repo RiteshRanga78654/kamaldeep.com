@@ -47,7 +47,7 @@ export default function Hero() {
             className="flex flex-col items-center justify-center text-center lg:-ml-4 lg:mt-[-75px] lg:items-start lg:pl-10 lg:text-left"
             style={{ fontFamily: "Cormorant Infant, serif" }}
           >
-            <h1 className="z-[10] text-[clamp(1.75rem,7vw,2.5rem)] leading-[1.1] text-ink lg:ml-[-87px] lg:text-[40px] xl:text-[58px]">
+            <h1 className="z-[10] text-[clamp(1.75rem,7vw,2.5rem)] leading-[1.1] text-ink lg:ml-[-87px] lg:text-[40px] xl:ml-[-113px] xl:text-[58px]">
               <span className="block">
                 <span className="lg:text-white">Lea</span>ding Real Estate
               </span>

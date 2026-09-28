@@ -1,0 +1,113 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+const links = [
+  { label: "Home", href: "#" },
+  { label: "About", href: "#about" },
+  { label: "Services", href: "#services" },
+  { label: "Blog", href: "#blog" },
+  { label: "Contact", href: "#contact" },
+];
+
+export default function Header() {
+  const [open, setOpen] = useState(false);
+
+  // Close the mobile menu with the Escape key
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <header className="absolute inset-x-0 top-0 z-30">
+      <div className="container-x flex items-center justify-between py-5 sm:py-8">
+        <a
+          href="#"
+          className="font-serif text-[1.625rem] italic leading-[30px] text-ink sm:text-4xl sm:leading-[36px]"
+          style={{
+            fontFamily: "var(--font-playfair), 'Playfair Display', serif",
+            color: "#5F694B",
+          }}
+        >
+          Kamaldeep.com
+        </a>
+
+        <nav
+          className="hidden items-center gap-9 md:flex"
+          style={{
+            fontFamily: "var(--font-plus-jakarta), 'Work Sans', sans-serif",
+            lineHeight: "15px",
+            letterSpacing: "1.5px",
+            fontSize: "12px",
+            textTransform: "uppercase",
+            fontWeight: 600,
+          }}
+        >
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="nav-link transition-colors duration-200 hover:opacity-70"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Hamburger: 44px tap area, turns into an X when open */}
+        <button
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((v) => !v)}
+          className="-mr-2 flex h-11 w-11 flex-col items-center justify-center gap-[5px] md:hidden"
+        >
+          <span
+            className={`h-px w-5 bg-ink transition-transform duration-300 ${
+              open ? "translate-y-[6px] rotate-45" : ""
+            }`}
+          />
+          <span
+            className={`h-px w-5 bg-ink transition-opacity duration-200 ${
+              open ? "opacity-0" : ""
+            }`}
+          />
+          <span
+            className={`h-px w-5 bg-ink transition-transform duration-300 ${
+              open ? "-translate-y-[6px] -rotate-45" : ""
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Mobile menu: solid panel under the header, so links never sit on top of hero content */}
+      <div
+        id="mobile-menu"
+        aria-hidden={!open}
+        className={`absolute inset-x-0 top-full border-t border-ink/10 bg-cream/95 shadow-lg backdrop-blur transition-all duration-300 md:hidden ${
+          open
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-2 opacity-0"
+        }`}
+      >
+        <nav className="container-x flex flex-col py-2">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="border-b border-ink/10 py-4 text-sm font-medium uppercase tracking-wider text-ink/80 transition-colors last:border-b-0 hover:text-[#5F694B]"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}

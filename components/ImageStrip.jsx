@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 
-const INSTAGRAM_URL = "https://www.instagram.com/your_username/";
+const INSTAGRAM_URL = "https://www.instagram.com/officialkamaldeep.01/";
 
 // Har photo ka alag Instagram post link bhi de sakte ho (href badal do)
 const images = [

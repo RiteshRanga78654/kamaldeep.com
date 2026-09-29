@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
+  { label: "About", href: "/aboutus" },
+  { label: "Projects", href: "/projects" },
   { label: "Blog", href: "/blogs" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Header() {
@@ -26,9 +26,8 @@ export default function Header() {
   return (
     <header className="absolute inset-x-0 top-0 z-30">
       <div className="container-x flex items-center justify-between py-5 sm:py-8">
-        {/* Logo: lg screen (1024px) par aur left karne ke liye 'lg:-ml-4' ya 'lg:pl-0' add kiya hai */}
         <a
-          href="#"
+          href="/"
           className="font-serif text-[1.625rem] italic leading-[30px] text-ink sm:text-4xl sm:leading-[36px] lg:-ml-6.5 xl:ml-[-87px]"
           style={{
             fontFamily: "var(--font-playfair), 'Playfair Display', serif",

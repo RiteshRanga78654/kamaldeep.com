@@ -65,3 +65,15 @@ body {
 .nav-link {
   @apply text-[15px] tracking-wide text-ink/80 hover:text-ink transition-colors;
 }
+
+/* Cormorant + Work Sans — the families the blogs / projects / about / contact
+   pages load through the Google Fonts link (components/PageFonts.jsx). Exposed
+   as utilities so those pages can be written in Tailwind without hard-coding
+   font stacks in every className. */
+@utility font-cormorant {
+  font-family: "Cormorant", Georgia, serif;
+}
+
+@utility font-work-sans {
+  font-family: "Work Sans", sans-serif;
+}

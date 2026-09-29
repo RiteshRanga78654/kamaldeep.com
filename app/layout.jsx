@@ -4,7 +4,6 @@ import "./globals.css";
 const display = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
   variable: "--font-display",
 });
 

@@ -14,6 +14,7 @@ const body = Jost({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://kamaldeep.com"),
   title: "Kamaldeep Prajapati — Content Creator Coach & Mentor",
   description:
     "Kamaldeep Prajapati helps content creators elevate their online presence with personalized coaching, courses, and resources.",

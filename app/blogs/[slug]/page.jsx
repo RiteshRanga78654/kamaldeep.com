@@ -9,24 +9,31 @@ import BlogCard from "@/components/BlogCard";
 import NewsletterCard from "@/components/NewsletterCard";
 import PageFonts from "@/components/PageFonts";
 
-import { POSTS, getAdjacentPosts, getPostBySlug, getRelatedPosts } from "../posts";
+import {
+  adjacentArticles,
+  findPublishedArticle,
+  publishedArticleSlugs,
+  relatedArticles,
+} from "@/lib/controller/article";
+import { formatDate, isoDate } from "@/lib/utils/format";
 
 /**
  * Single article page (server component).
- * Prerenders every slug via `generateStaticParams`; unknown slugs → `notFound()`.
+ * Prerenders every published slug via `generateStaticParams`; unknown slugs →
+ * `notFound()`.
  */
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kamaldeep.com";
 const HERO_SIZES = "(min-width: 1200px) 1200px, 100vw";
 const RELATED_SIZES = "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw";
 
-export function generateStaticParams() {
-  return POSTS.map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  return publishedArticleSlugs().then((slugs) => slugs.map((slug) => ({ slug })));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await findPublishedArticle(slug);
 
   if (!post) {
     return { title: "Article not found — Kamaldeep.com" };
@@ -40,14 +47,14 @@ export async function generateMetadata({ params }) {
       title: post.title,
       description: post.excerpt,
       type: "article",
-      publishedTime: post.date,
-      images: [{ url: post.img }],
+      publishedTime: isoDate(post.publishedAt),
+      images: [{ url: post.coverImage }],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
-      images: [post.img],
+      images: [post.coverImage],
     },
   };
 }
@@ -87,7 +94,7 @@ function ArticleMeta({ post }) {
       >
         {post.category}
       </Link>
-      <time dateTime={post.date}>{post.dateLabel}</time>
+      <time dateTime={isoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
       <span aria-hidden="true" className="h-1 w-1 rounded-full bg-muted/50" />
       <span>{post.readingTime}</span>
     </div>
@@ -230,7 +237,7 @@ function RelatedSection({ posts }) {
       </div>
       <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <BlogCard key={post.slug} post={post} sizes={RELATED_SIZES} />
+          <BlogCard key={post._id} post={post} sizes={RELATED_SIZES} />
         ))}
       </div>
     </section>
@@ -241,20 +248,20 @@ function RelatedSection({ posts }) {
 
 export default async function BlogPostPage({ params }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await findPublishedArticle(slug);
 
   if (!post) notFound();
 
-  const related = getRelatedPosts(slug, 3);
-  const { previous, next } = getAdjacentPosts(slug);
+  const related = await relatedArticles(slug, 3);
+  const { previous, next } = await adjacentArticles(slug);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: post.img,
-    datePublished: post.date,
+    image: post.coverImage,
+    datePublished: isoDate(post.publishedAt),
     mainEntityOfPage: `${SITE_URL}/blogs/${post.slug}`,
   };
 
@@ -282,8 +289,8 @@ export default async function BlogPostPage({ params }) {
           {/* `relative` is required for next/image `fill` */}
           <figure className="relative mt-12 aspect-[16/9] w-full overflow-hidden rounded-[3px] bg-sand sm:mt-14">
             <Image
-              src={post.img}
-              alt={post.imgAlt || post.title}
+              src={post.coverImage}
+              alt={post.alt || post.title}
               fill
               priority
               sizes={HERO_SIZES}

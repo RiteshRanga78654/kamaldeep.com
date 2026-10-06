@@ -3,8 +3,8 @@ import Image from "next/image";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-cream pb-16 pt-16 md:pb-24 md:pt-24">
-      {/* Decorative image – left (same as original, xl+) */}
-      <div className="pointer-events-none absolute bottom-16 left-0 z-0 hidden h-[300px] w-[210px] xl:block 2xl:h-[350px] 2xl:w-[240px]">
+      {/* Decorative image – left (500ms delay ke baad left se slide + fade karegi) */}
+      <div className="pointer-events-none absolute bottom-16 left-0 z-0 hidden h-[300px] w-[210px] duration-1000 animate-in fade-in slide-in-from-left-8 fill-mode-backwards delay-500 xl:block 2xl:h-[350px] 2xl:w-[240px]">
         <div className="absolute -bottom-8 -right-8 bottom-20 h-full w-full bg-sand" />
         <div className="relative bottom-20 h-full w-full overflow-hidden shadow-md">
           <Image
@@ -16,8 +16,8 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Decorative image – right (same as original, xl+) */}
-      <div className="pointer-events-none absolute right-0 top-20 z-0 hidden h-[300px] w-[240px] xl:block 2xl:h-[350px] 2xl:w-[275px]">
+      {/* Decorative image – right (700ms delay ke baad right se slide + fade karegi) */}
+      <div className="pointer-events-none absolute right-0 top-20 z-0 hidden h-[300px] w-[240px] duration-1000 animate-in fade-in slide-in-from-right-8 fill-mode-backwards delay-700 xl:block 2xl:h-[350px] 2xl:w-[275px]">
         <div className="relative h-full w-full overflow-hidden shadow-md">
           <Image
             src="/profile/kamal01/award.jpeg"
@@ -30,7 +30,7 @@ export default function Hero() {
 
       <div className="container-x relative z-10">
         <div className="flex flex-col items-center gap-8 lg:ml-[220px] lg:flex-row lg:items-stretch lg:gap-0">
-          {/* Portrait: 400 x 700 shifted up 98px on desktop (original), fluid below lg */}
+          {/* Portrait */}
           <div className="relative aspect-[4/5] w-full max-w-[360px] shrink-0 overflow-hidden shadow-lg sm:max-w-[400px] lg:top-[-98px] lg:aspect-auto lg:h-[700px] lg:w-[400px] lg:max-w-none">
             <Image
               src="/profile/kamal01/kamalsir.jpeg"

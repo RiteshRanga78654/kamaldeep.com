@@ -6,7 +6,8 @@ import ImageStrip from "@/components/ImageStrip";
 import ProjectCard from "@/components/ProjectCard";
 import PageFonts from "@/components/PageFonts";
 
-import { CLIENT_LOGOS, PROCESS, PROJECTS } from "./project-data";
+import { CLIENT_LOGOS, PROCESS } from "./section-copy";
+import { listPublishedProjects } from "@/lib/controller/project";
 
 /**
  * Projects listing (server component — it has no client state, so it can also
@@ -66,14 +67,14 @@ const MARQUEE_CSS = `
 
 /* -------------------------------------------------------------- sections */
 
-function Hero() {
+function Hero({ count }) {
   return (
     <section
       aria-labelledby="projects-heading"
       className="container-x pb-14 pt-32 sm:pb-20 sm:pt-40"
     >
       <p className="text-[13px] text-olive-dark">
-        Selected work · {PROJECTS.length} projects
+        Selected work · {count} projects
       </p>
       <h1
         id="projects-heading"
@@ -89,13 +90,13 @@ function Hero() {
   );
 }
 
-function ProjectsGrid() {
+function ProjectsGrid({ projects }) {
   return (
     <section aria-label="Projects" className="container-x">
       <div className="grid grid-cols-1 gap-x-12 gap-y-16 md:grid-cols-2">
-        {PROJECTS.map((project, index) => (
+        {projects.map((project, index) => (
           <ProjectCard
-            key={project.slug}
+            key={project._id}
             project={project}
             sizes={CARD_SIZES}
             priority={index < 2}
@@ -205,7 +206,11 @@ function CtaSection() {
 
 /* ------------------------------------------------------------------ root */
 
-export default function ProjectsPage() {
+export const revalidate = 60;
+
+export default async function ProjectsPage() {
+  const projects = await listPublishedProjects();
+
   return (
     <div className="bg-cream font-work-sans text-muted">
       <style>{MARQUEE_CSS}</style>
@@ -213,8 +218,8 @@ export default function ProjectsPage() {
       <Header />
 
       <main className="pb-20 sm:pb-24">
-        <Hero />
-        <ProjectsGrid />
+        <Hero count={projects.length} />
+        <ProjectsGrid projects={projects} />
         <ProcessSection />
         <LogoMarquee />
         <CtaSection />

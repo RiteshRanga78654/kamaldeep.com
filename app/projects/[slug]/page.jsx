@@ -7,7 +7,11 @@ import Footer from "@/components/Footer";
 import ImageStrip from "@/components/ImageStrip";
 import PageFonts from "@/components/PageFonts";
 
-import { PROJECTS, getNextProject, getProjectBySlug } from "../project-data.js";
+import {
+  findPublishedProject,
+  nextPublishedProject,
+  publishedProjectSlugs,
+} from "@/lib/controller/project";
 
 /**
  * Single project page (server component).
@@ -23,13 +27,14 @@ const NEXT_SIZES = "(min-width: 768px) 40vw, 100vw";
 const FOCUS_RING =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-olive-dark";
 
-export function generateStaticParams() {
-  return PROJECTS.map((project) => ({ slug: project.slug }));
+export async function generateStaticParams() {
+  const slugs = await publishedProjectSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await findPublishedProject(slug);
 
   if (!project) {
     return { title: "Project not found — Kamaldeep.com" };
@@ -43,13 +48,13 @@ export async function generateMetadata({ params }) {
       title: project.title,
       description: project.excerpt,
       type: "article",
-      images: [{ url: project.img }],
+      images: [{ url: project.coverImage }],
     },
     twitter: {
       card: "summary_large_image",
       title: project.title,
       description: project.excerpt,
-      images: [project.img],
+      images: [project.coverImage],
     },
   };
 }
@@ -133,7 +138,7 @@ function Gallery({ project }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         {images.map((src, index) => (
           <figure
-            key={src}
+            key={`${src}-${index}`}
             className={`relative w-full overflow-hidden rounded-[3px] bg-sand ${
               index === 0 ? "aspect-[16/10] sm:col-span-2" : "aspect-[4/3]"
             }`}
@@ -211,7 +216,7 @@ function NextProject({ project }) {
       >
         <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-[3px] bg-cream">
           <Image
-            src={project.img}
+            src={project.coverImage}
             alt={project.title}
             fill
             sizes={NEXT_SIZES}
@@ -244,13 +249,15 @@ function NextProject({ project }) {
 
 /* ------------------------------------------------------------------ page */
 
+export const revalidate = 60;
+
 export default async function ProjectPage({ params }) {
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = await findPublishedProject(slug);
 
   if (!project) notFound();
 
-  const nextProject = getNextProject(slug);
+  const nextProject = await nextPublishedProject(slug);
 
   return (
     <div className="bg-cream font-work-sans text-muted">
@@ -282,8 +289,8 @@ export default async function ProjectPage({ params }) {
             {/* `relative` is required for next/image `fill` */}
             <figure className="relative mt-12 aspect-[16/9] w-full overflow-hidden rounded-[3px] bg-sand sm:mt-14">
               <Image
-                src={project.img}
-                alt={project.imgAlt || project.title}
+                src={project.coverImage}
+                alt={project.alt || project.title}
                 fill
                 priority
                 sizes={HERO_SIZES}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const links = [
   { label: "Home", href: "/" },
@@ -26,7 +27,7 @@ export default function Header() {
   return (
     <header className="absolute inset-x-0 top-0 z-30">
       <div className="container-x flex items-center justify-between py-5 sm:py-8">
-        <a
+        <Link
           href="/"
           className="font-serif text-[1.625rem] italic leading-[30px] text-ink sm:text-4xl sm:leading-[36px] lg:-ml-6.5 xl:ml-[-87px]"
           style={{
@@ -35,7 +36,7 @@ export default function Header() {
           }}
         >
           Kamaldeep.com
-        </a>
+        </Link>
 
         {/* Desktop nav: ab 1024px tak hidden rahega, sirf 1024px ke baad (xl: 1280px par) ya lg se upar aayega */}
         <nav

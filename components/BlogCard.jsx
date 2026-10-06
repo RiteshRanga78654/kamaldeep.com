@@ -1,12 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { formatDate, isoDate } from "@/lib/utils/format";
+
 const DEFAULT_SIZES =
   "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw";
 
 /**
  * Blog card shared by the listing page, the related-posts rail on an article
  * page and the 404 page, so every card in the site is pixel-identical.
+ *
+ * Takes an article document straight from MongoDB — `coverImage` and
+ * `publishedAt` come from the database, nothing is reshaped in between.
  *
  * The card is a full-height flex column with a clamped title and excerpt and a
  * `mt-auto` footer link, which is what keeps a grid of cards perfectly aligned:
@@ -23,7 +28,7 @@ export default function BlogCard({ post, sizes = DEFAULT_SIZES, priority = false
         className="relative block aspect-[4/3] w-full overflow-hidden rounded-[3px] bg-sand"
       >
         <Image
-          src={post.img}
+          src={post.coverImage}
           alt=""
           fill
           sizes={sizes}
@@ -37,7 +42,7 @@ export default function BlogCard({ post, sizes = DEFAULT_SIZES, priority = false
           {post.category}
         </span>
         <span aria-hidden="true">•</span>
-        <time dateTime={post.date}>{post.dateLabel}</time>
+        <time dateTime={isoDate(post.publishedAt)}>{formatDate(post.publishedAt)}</time>
         <span aria-hidden="true">•</span>
         <span>{post.readingTime}</span>
       </p>

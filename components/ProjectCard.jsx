@@ -19,7 +19,7 @@ export default function ProjectCard({ project, sizes = DEFAULT_SIZES, priority =
         className="relative block aspect-[4/3] w-full overflow-hidden rounded-[3px] bg-sand"
       >
         <Image
-          src={project.img}
+          src={project.coverImage}
           alt=""
           fill
           sizes={sizes}

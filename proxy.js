@@ -19,14 +19,14 @@ export function proxy(request) {
   const hasSession = hasSessionCookie(request);
 
   if (pathname.startsWith("/admin")) {
-    if (!hasSession) {
-      const url = new URL("/login", request.url);
+    if (!hasSession && pathname !== "/admin/login") {
+      const url = new URL("/admin/login", request.url);
       if (pathname !== "/admin") url.searchParams.set("next", pathname);
       return NextResponse.redirect(url);
     }
   }
 
-  if (pathname === "/login") {
+  if (pathname === "/admin/login") {
     if (hasSession) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
@@ -34,5 +34,5 @@ export function proxy(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/admin", "/login"],
+  matcher: ["/admin/:path*", "/admin", "/admin/login"],
 };

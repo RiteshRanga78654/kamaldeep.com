@@ -27,8 +27,22 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kamaldeep.com";
 const HERO_SIZES = "(min-width: 1200px) 1200px, 100vw";
 const RELATED_SIZES = "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw";
 
+// Allow pages not pre-rendered at build time to generate dynamically on-demand
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
-  return publishedArticleSlugs().then((slugs) => slugs.map((slug) => ({ slug })));
+  try {
+    const slugs = await publishedArticleSlugs();
+    return (slugs || []).map((slug) => ({ slug }));
+  } catch (error) {
+    console.warn(
+      "[generateStaticParams] Skipping build-time prerendering due to connection issue:",
+      error.message
+    );
+    // Returning an empty array allows the build to pass.
+    // Articles will be dynamically rendered when visited.
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {

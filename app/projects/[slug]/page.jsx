@@ -27,9 +27,21 @@ const NEXT_SIZES = "(min-width: 768px) 40vw, 100vw";
 const FOCUS_RING =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-olive-dark";
 
+// Allow non-prerendered slugs to be generated dynamically on first visit
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
-  const slugs = await publishedProjectSlugs();
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await publishedProjectSlugs();
+    return (slugs || []).map((slug) => ({ slug }));
+  } catch (error) {
+    console.warn(
+      "[generateStaticParams:projects] Skipping build-time prerender due to connection issue:",
+      error.message
+    );
+    // Returning an empty array prevents the build step from failing
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }) {

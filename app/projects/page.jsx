@@ -209,7 +209,7 @@ function CtaSection() {
 export const revalidate = 60;
 
 export default async function ProjectsPage() {
-  const projects = await listPublishedProjects();
+  let projects = []; try { projects = await listPublishedProjects(); } catch(e){ projects=[]; }
 
   return (
     <div className="bg-cream font-work-sans text-muted">

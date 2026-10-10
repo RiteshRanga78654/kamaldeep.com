@@ -17,7 +17,16 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function BlogPage() {
-  const posts = await listPublishedArticles();
+  let posts = [];
+  try {
+    posts = await listPublishedArticles();
+  } catch (error) {
+    console.warn(
+      "[BlogPage] Skipping DB fetch during build/prerender:",
+      error?.message
+    );
+    posts = [];
+  }
 
   return <BlogIndex posts={posts} />;
 }
